@@ -3,6 +3,8 @@ AX650部署PPOCRv3
 
 ## 用法
 
+先在 https://github.com/ZHEQIUSHUI/ax-ocr/releases 下载模型，并解压
+
 ```
 python3 python_ax/main.py images/aoguanhai.jpg
 ```
