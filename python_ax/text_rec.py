@@ -1,4 +1,4 @@
-import axengine as onnxruntime
+import axengine
 import numpy as np
 import cv2
 import math
@@ -23,7 +23,7 @@ class strLabelConverter(object):
 
 class TextRecognizer:
     def __init__(self):
-        self.sess = onnxruntime.InferenceSession.load_from_model('models/ax/ppocr_rec_v3.axmodel')
+        self.sess = axengine.InferenceSession('models/ax/ppocr_rec_v3.axmodel')
         self.alphabet = list(map(lambda x:x.decode('utf-8').strip("\n").strip("\r\n"), open('models/ppocr_keys_v1.txt', 'rb').readlines()))
         self.converter = strLabelConverter(''.join(self.alphabet))
         self.rec_image_shape = [3, 48, 320]
@@ -54,9 +54,9 @@ class TextRecognizer:
         img = self.resize_norm_img(im)
         transformed_image = np.expand_dims(img, axis=0)
 
-        ort_inputs = {i: transformed_image for i in self.sess.get_inputs()}
-        preds = self.sess.run(ort_inputs)
-        preds = preds[self.sess.get_outputs()[0]].squeeze(axis=0)
+        ort_inputs = {i.name: transformed_image for i in self.sess.get_inputs()}
+        preds = self.sess.run(None, ort_inputs)
+        preds = preds[0].squeeze(axis=0)
         length  = preds.shape[0]
         preds = preds.reshape(length,-1)
         # preds = softmax(preds)

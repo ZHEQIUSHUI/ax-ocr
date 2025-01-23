@@ -1,11 +1,11 @@
-import axengine as onnxruntime
+import axengine
 import math
 import cv2
 import numpy as np
 
 class TextClassifier:
     def __init__(self):
-        self.sess = onnxruntime.InferenceSession.load_from_model('models/ax/ppocr_cls_v2.axmodel')
+        self.sess = axengine.InferenceSession('models/ax/ppocr_cls_v2.axmodel')
         self.cls_image_shape = [3, 48, 192]
         self.label_list = ['0', '180']
 
@@ -35,8 +35,8 @@ class TextClassifier:
         img = self.resize_norm_img(im)
         transformed_image = np.expand_dims(img, axis=0)
 
-        ort_inputs = {i: transformed_image for i in self.sess.get_inputs()}
-        preds = self.sess.run(ort_inputs)
-        preds = preds[self.sess.get_outputs()[0]].squeeze(axis=0)
+        ort_inputs = {i.name: transformed_image for i in self.sess.get_inputs()}
+        preds = self.sess.run(None, ort_inputs)
+        preds = preds[0].squeeze(axis=0)
         pred_idxs = preds.argmax()
         return self.label_list[pred_idxs]

@@ -1,4 +1,4 @@
-import axengine as onnxruntime
+import axengine
 import numpy as np
 import cv2
 import pyclipper
@@ -145,7 +145,7 @@ class TextDetector():
     def __init__(self):
         # so = onnxruntime.SessionOptions()
         # so.log_severity_level = 3
-        self.session = onnxruntime.InferenceSession.load_from_model('models/ax/ppocr_det_v3.axmodel')
+        self.session = axengine.InferenceSession('models/ax/ppocr_det_v3.axmodel')
         self.input_size = (480, 480)  ###width, height
         self.short_size = 480
         self.mean = np.array([0.485, 0.456, 0.406], dtype=np.float32).reshape((1,1,3))
@@ -218,10 +218,10 @@ class TextDetector():
         h, w = srcimg.shape[:2]
         img = self.preprocess(srcimg)
 
-        ort_inputs = {i: img[None, :, :, :] for i in self.session.get_inputs()}
-        outputs = self.session.run(ort_inputs)
+        ort_inputs = {i.name: img[None, :, :, :] for i in self.session.get_inputs()}
+        outputs = self.session.run(None, ort_inputs)
         
-        mask = outputs[self.session.get_outputs()[0]][0, 0, ...]
+        mask = outputs[0][0, 0, ...]
         batch = {'shape': (h, w)}
         box_list, score_list = self.decode(batch, mask)
         box_list, score_list = box_list[0], score_list[0]
